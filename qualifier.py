@@ -5,6 +5,15 @@
 from typing import Any, List, Optional
 import math
 
+def getRow(text, maxLen, wordLen, centered):
+    if centered:
+        left = " " * (1 + math.floor((maxLen - wordLen) / 2))
+        right = " " * (1 + math.ceil((maxLen - wordLen) / 2))
+        rowText = left + text + right
+    else:
+        rowText = " " + text + " " * (maxLen - wordLen) + " "
+    return rowText
+
 def lines(lengths):
     top = "┌"
     sep = "├"
@@ -27,51 +36,42 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
     # Finds out the length of longest string in each column 
     lengths = []
     colNo = len(rows[0])
-    rowNo = len(rows)
     for i in range(colNo):    
         l = [str(x[i]) for x in rows]
         if labelPresent: l.append(str(labels[i]))
         lengths.append(len(max(l, key = len)))
 
-    rowCorrected = [["" for column in row] for row in rows]
-    # Fixes word spacing
-    for i in range(rowNo):
-        for j in range(colNo):
-            word = str(rows[i][j])
-            maxLen = lengths[j]
-            wordLen = len(str(word))
-            if centered:
-                left = " " * (1 + math.floor((maxLen - wordLen) / 2))
-                right = " " * (1 + math.ceil((maxLen - wordLen) / 2))
-                rowCorrected[i][j] = left + word + right
-            else: rowCorrected[i][j] = " " + word + " " * (maxLen - wordLen) + " "
-    
-    # Fixes spacing for labels
-    if labelPresent: 
-        labelCorrected = ["" for label in labels]
-        labelNo = len(labels)
-        for i in range(labelNo):
-            word = str(labels[i])
-            maxLen = lengths[i]
-            wordLen = len(str(word))
-            if centered:
-                left = " " * (1 + math.floor((maxLen - wordLen) / 2))
-                right = " " * (1 + math.ceil((maxLen - wordLen) / 2))
-                labelCorrected[i] = left + word + right
-            else: labelCorrected[i] = " " + word + " " * (maxLen - wordLen) + " "
-
-    # Prints table
+    # Makes formats
     lineList = lines(lengths)
     rowFormat = lambda x: "│" + "│".join(x) + "│"
 
-    table = ""
+    # Starts making table
+    table = lineList[0] + "\n"
 
-    table += lineList[0] + "\n"
+    counter = 0
     if labelPresent:
-        table += rowFormat(labelCorrected) + "\n"
+        labelWords = []
+        for label in labels:
+            label = str(label)
+            maxLen = lengths[counter]
+            wordLen = len(label)
+            labelWords.append(getRow(label, maxLen, wordLen, centered))
+            counter += 1
+        table += rowFormat(labelWords) + "\n"
         table += lineList[1] + "\n"
-    for row in rowCorrected:
-        table += rowFormat(row) + "\n"
-    table += lineList[2]
+
+    for row in rows:
+        counter = 0
+        rowWords = []
+        for col in row:
+            col = str(col)
+            maxLen = lengths[counter]
+            wordLen = len(col)
+            rowWords.append(getRow(col, maxLen, wordLen, centered))
+            counter += 1
+        table += rowFormat(rowWords) + "\n"
+
+    table += lineList[2]   
 
     return table
+ 
