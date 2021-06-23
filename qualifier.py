@@ -48,6 +48,7 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
     # Starts making table
     table = lineList[0] + "\n"
 
+    # Makes labels
     counter = 0
     if labelPresent:
         labelWords = []
@@ -60,6 +61,7 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
         table += rowFormat(labelWords) + "\n"
         table += lineList[1] + "\n"
 
+    # Makes rows
     for row in rows:
         counter = 0
         rowWords = []
@@ -74,4 +76,4 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
     table += lineList[2]   
 
     return table
- 
+    
