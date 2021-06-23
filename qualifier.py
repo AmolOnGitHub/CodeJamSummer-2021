@@ -1,45 +1,77 @@
 # pylint: disable=invalid-name, wrong-import-order, missing-module-docstring, unused-wildcard-import
-# pylint: disable=missing-function-docstring, global-statement, multiple-statements, unused-argument
+# pylint: disable=missing-function-docstring, global-statement, multiple-statements, unused-argument, too-many-locals
 # pylint: disable=pointless-statement, trailing-whitespace, redefined-outer-name, wildcard-import, line-too-long
 
 from typing import Any, List, Optional
+import math
 
-def draw_table(rows = 1, columns = 1, text = " ", labelPresent: bool = False):
-    spaces = "─" * len(text)
-    top = "┌" + spaces + (("┬" + spaces) * (columns - 1)) + "┐"
-    sep = "├" + spaces + (("┼" + spaces) * (columns - 1)) + "┤"
-    bot = "└" + spaces + (("┴" + spaces) * (columns - 1)) + "┘"
+def lines(lengths):
+    top = "┌"
+    sep = "├"
+    bot = "└"
+    for length in lengths:
+        length += 2
+        top += "─" * length + "┬"
+        sep += "─" * length + "┼"
+        bot += "─" * length + "┴"
 
-    row = lambda x: (("│" + x) * (columns)) + "│"
+    top = top[:-1] + "┐"
+    sep = sep[:-1] + "┤"
+    bot = bot[:-1] + "┘"
 
-    print(top)
-    if labelPresent:
-        print(row("label"))
-        print(sep)
-    for _ in range(rows):
-        print(row(text))
-    print(bot)
-    
+    return [top, sep, bot]
 
 def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, centered: bool = False) -> str:
-    """
-    :param rows: 2D list containing objects that have a single-line representation (via `str`).
-    All rows must be of the same length.
-    :param labels: List containing the column labels. If present, the length must equal to that of each row.
-    :param centered: If the items should be aligned to the center, else they are left aligned.
-    :return: A table representing the rows passed in.
-    """
+    labelPresent = True if labels is not None else False
     
-    return 0
+    # Finds out the length of longest string in each column 
+    lengths = []
+    colNo = len(rows[0])
+    rowNo = len(rows)
+    for i in range(colNo):    
+        l = [str(x[i]) for x in rows]
+        if labelPresent: l.append(str(labels[i]))
+        lengths.append(len(max(l, key = len)))
 
-table = make_table(
-   rows=[
-       ["Ducky Yellow", 3],
-       ["Ducky Dave", 12],
-       ["Ducky Tube", 7],
-       ["Ducky Lemon", 1]
-   ],
-   centered=True
-)
+    rowCorrected = [["" for column in row] for row in rows]
+    # Fixes word spacing
+    for i in range(rowNo):
+        for j in range(colNo):
+            word = str(rows[i][j])
+            maxLen = lengths[j]
+            wordLen = len(str(word))
+            if centered:
+                left = " " * (1 + math.floor((maxLen - wordLen) / 2))
+                right = " " * (1 + math.ceil((maxLen - wordLen) / 2))
+                rowCorrected[i][j] = left + word + right
+            else: rowCorrected[i][j] = " " + word + " " * (maxLen - wordLen) + " "
+    
+    # Fixes spacing for labels
+    if labelPresent: 
+        labelCorrected = ["" for label in labels]
+        labelNo = len(labels)
+        for i in range(labelNo):
+            word = str(labels[i])
+            maxLen = lengths[i]
+            wordLen = len(str(word))
+            if centered:
+                left = " " * (1 + math.floor((maxLen - wordLen) / 2))
+                right = " " * (1 + math.ceil((maxLen - wordLen) / 2))
+                labelCorrected[i] = left + word + right
+            else: labelCorrected[i] = " " + word + " " * (maxLen - wordLen) + " "
 
-draw_table(rows = 2, columns = 6, labelPresent = True, text = "text ")
+    # Prints table
+    lineList = lines(lengths)
+    rowFormat = lambda x: "│" + "│".join(x) + "│"
+
+    table = ""
+
+    table += lineList[0] + "\n"
+    if labelPresent:
+        table += rowFormat(labelCorrected) + "\n"
+        table += lineList[1] + "\n"
+    for row in rowCorrected:
+        table += rowFormat(row) + "\n"
+    table += lineList[2]
+
+    return table
