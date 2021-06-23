@@ -43,7 +43,6 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
 
     # Makes formats
     lineList = lines(lengths)
-    rowFormat = lambda x: "│" + "│".join(x) + "│"
 
     # Starts making table
     table = lineList[0] + "\n"
@@ -51,27 +50,26 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
     # Makes labels
     counter = 0
     if labelPresent:
-        labelWords = []
+        table += "│"
         for label in labels:
             label = str(label)
             maxLen = lengths[counter]
             wordLen = len(label)
-            labelWords.append(getRow(label, maxLen, wordLen, centered))
+            table += getRow(label, maxLen, wordLen, centered) + "│"
             counter += 1
-        table += rowFormat(labelWords) + "\n"
-        table += lineList[1] + "\n"
+        table += "\n" + lineList[1] + "\n"
 
     # Makes rows
     for row in rows:
         counter = 0
-        rowWords = []
+        table += "│"
         for col in row:
             col = str(col)
             maxLen = lengths[counter]
             wordLen = len(col)
-            rowWords.append(getRow(col, maxLen, wordLen, centered))
+            table += getRow(col, maxLen, wordLen, centered) + "│"
             counter += 1
-        table += rowFormat(rowWords) + "\n"
+        table += "\n"
 
     table += lineList[2]   
 
