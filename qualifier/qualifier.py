@@ -2,35 +2,34 @@
 # pylint: disable=missing-function-docstring, global-statement, multiple-statements, unused-argument, too-many-locals
 # pylint: disable=pointless-statement, trailing-whitespace, redefined-outer-name, wildcard-import, line-too-long
 
-from typing import Any, List, Optional
-import math
+from typing import Any, Optional
 
 def getRow(text, maxLen, wordLen, centered):
     if centered:
-        left = " " * (1 + math.floor((maxLen - wordLen) / 2))
-        right = " " * (1 + math.ceil((maxLen - wordLen) / 2))
-        rowText = left + text + right
+        rowText = text.center(maxLen, " ")
     else:
-        rowText = " " + text + " " * (maxLen - wordLen) + " "
-    return rowText
+        rowText = text + " " * (maxLen - wordLen)
+    return " " + rowText + " "
 
 def lines(lengths):
-    top = "┌"
-    sep = "├"
-    bot = "└"
-    for length in lengths:
-        length += 2
-        top += "─" * length + "┬"
-        sep += "─" * length + "┼"
-        bot += "─" * length + "┴"
+    temp = lengths[0] + 2
+    top = "┌" + temp * "─"
+    sep = "├" + temp * "─"
+    bot = "└" + temp * "─"
 
-    top = top[:-1] + "┐"
-    sep = sep[:-1] + "┤"
-    bot = bot[:-1] + "┘"
+    for length in lengths[1:]:
+        length += 2
+        top += "┬" + "─" * length 
+        sep += "┼" + "─" * length 
+        bot += "┴" + "─" * length 
+
+    top += "┐"
+    sep += "┤"
+    bot += "┘"
 
     return [top, sep, bot]
 
-def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, centered: bool = False) -> str:
+def make_table(rows: list[list[Any]], labels: Optional[list[Any]] = None, centered: bool = False) -> str:
     labelPresent = True if labels is not None else False
     
     # Finds out the length of longest string in each column 
@@ -74,4 +73,15 @@ def make_table(rows: List[List[Any]], labels: Optional[List[Any]] = None, center
     table += lineList[2]   
 
     return table
-    
+
+table = make_table(
+   rows=[
+       ["Ducky Yellow", 3],
+       ["Ducky Dave", 12],
+       ["Ducky Tube", 7],
+       ["Ducky Lemon", 1]
+   ],
+   labels=["Name", "Duckiness"],
+   centered=True
+)
+print(table)
